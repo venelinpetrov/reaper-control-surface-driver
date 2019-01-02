@@ -1,4 +1,6 @@
-
+/*
+*   NI Maschine Mikro Mk2 and Komplete Kontrol S25 driver for REAPER DAW
+*/
 const
     VOL_1_CC = 14,
     VOL_2_CC = 15,
