@@ -1,4 +1,4 @@
-# Maschine driver for REAPER
+# Example driver for REAPER
 
 ## How to use
 
@@ -29,6 +29,10 @@ I thought that I can exploit this by only removing the GUI and reading the incom
 In principle, the app intersepts incomming MIDI messages, interprets them based on some logic and send commands to REAPER in form of
 HTTP requests, where the URL contains the command(s). REAPER can respond and return messages to the app too. This is useful if you want
 to implement a feedback (e.g. you have some buttons that you want to lid and keep in sync with the DAW).
+
+MIDI CC Layout
+
+![image](https://user-images.githubusercontent.com/3126733/50611921-de817500-0ee0-11e9-8916-f65bf7f9c52a.png)
 
 Most of the explanations of the APIs are in the `main.js` file inside `Built-in pages...`. Also, there are a lot of comments in the driver's code, please check them out.
 
