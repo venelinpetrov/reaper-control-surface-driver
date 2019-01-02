@@ -19,19 +19,26 @@ to this implementation, that's always required.
 
 ## How it works
 
-REAPER has that feature that you can control it remotely from any device in the local network. 
-Please check [this video](https://youtu.be/CkMAj8CpvIU) out. 
+REAPER has that feature that you can control it remotely from any device in the local network.
+Please check [this video](https://youtu.be/CkMAj8CpvIU) out.
 
-Internally REAPER runs a web server that listens for HTTP requests from the web app (our driver) that you run in the browser.
-The app on the other hand intersepts incomming MIDI messages, interprets them based on some logic and send commands to REAPER in form of
-HTTP requests, where the URL contains the command(s). REAPER can respond and return messages to the app too. This is useful if you want 
+Internally REAPER runs a web server that listens for HTTP requests from a web app that you run in the browser. In the video above you can see that Kenny
+runs a GUI app and controls REAPER in realtime. He also receives feedback from the DAW like time, metronome, track mute/solo/arm/pan/vol params etc.
+I thought that I can exploit this by only removing the GUI and reading the incoming MIDI messages. And it worked.
+
+In principle, the app intersepts incomming MIDI messages, interprets them based on some logic and send commands to REAPER in form of
+HTTP requests, where the URL contains the command(s). REAPER can respond and return messages to the app too. This is useful if you want
 to implement a feedback (e.g. you have some buttons that you want to lid and keep in sync with the DAW).
+
+Most of the explanations of the APIs are in the `main.js` file inside `Built-in pages...`. Also, there are a lot of comments in the driver's code, please check them out.
 
 ## How to debug
 
 Since this is a normal web app it can be debugged directly in the browser, it will hit breakpoints and console log messages accordingly.
-If you use [Visual Studio Code](https://code.visualstudio.com/) and Chrome you can benefit from 
-[this extension](https://code.visualstudio.com/blogs/2016/02/23/introducing-chrome-debugger-for-vs-code) 
+If you use [Visual Studio Code](https://code.visualstudio.com/) and Chrome you can benefit from
+[this extension](https://code.visualstudio.com/blogs/2016/02/23/introducing-chrome-debugger-for-vs-code). Install the extension, put a breakpoint and hit F5.
+
+**NOTE**: Make sure that you are not running multiple instances of the web app! If you do, then REAPER will receive multiple messages and will not work as you wish.
 
 ## Pros and Cons
 
@@ -51,3 +58,7 @@ step process. One - paste the driver. Two - run web app in browser
 This can bring confusion if you are not careful
 
 Overall the benefits are greater than the drawbacks, but this is the further we can get until REAPER team doesn't invent something else.
+
+## Contribute
+
+Please open an issue if you like to discuss something or create a PR. You are very welcome to do so.
