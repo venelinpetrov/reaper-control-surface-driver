@@ -4,7 +4,7 @@
 
 1. In REAPER navigate to `Options->Preferences->Control/OSC/web`
 2. Click `Add`
-3. Chose `Web browser interface`
+3. Choose `Web browser interface`
 4. Click `User pages...`
 5. A window will popup. Clone the repo or download a zip and extract it there
 6. Choose the driver from the list that says `Default interfaces`
@@ -41,6 +41,8 @@ Most of the explanations of the APIs are in the `main.js` file inside `Built-in 
 Since this is a normal web app it can be debugged directly in the browser, it will hit breakpoints and console log messages accordingly.
 If you use [Visual Studio Code](https://code.visualstudio.com/) and Chrome you can benefit from
 [this extension](https://code.visualstudio.com/blogs/2016/02/23/introducing-chrome-debugger-for-vs-code). Install the extension, put a breakpoint and hit F5.
+
+![image](https://user-images.githubusercontent.com/3126733/50612097-839c4d80-0ee1-11e9-90c5-7dd54fb970ce.png)
 
 **NOTE**: Make sure that you are not running multiple instances of the web app! If you do, then REAPER will receive multiple messages and will not work as you wish.
 
