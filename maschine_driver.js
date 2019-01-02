@@ -21,25 +21,12 @@ const
 
 let
     last_transport_state = -1,
-    last_out_states = [-1, -1],
-    last_time_str = '',
-    last_titles = [],
-    last_flags = [],
-    last_vols = [],
-    last_pans = [],
-    last_metronome = false,
-    last_track_cnt = 0,
-    g_inspect_tridx = -1;
-
-let
-    minvol = -100,
-    maxvol = 24;
+    sel_trk_idx = null
+    last_track_cnt = 0;
 
 let
     outputs = null,
     outputs_by_name = {};
-
-let sel_trk_idx = null;
 
 // This function is called from 'main.js'
 function wwr_onreply(results) {
@@ -71,7 +58,6 @@ function wwr_onreply(results) {
                     }
                     break;
             }
-
         }
     }
 }
@@ -169,7 +155,7 @@ function init() {
         else
             wwr_req(`SET/TRACK/${sel_trk_idx}/SEL/0;SET/TRACK/${sel_trk_idx + 1}/SEL/1`);
 
-        // Since we are polling with frequence 1/1s, we can get inconsistent state
+        // Since we are polling with frequency 1/1s, we can get inconsistent state
         // if user clicks faster than that, hence the 'wwr_req('TRACK')' - it
         // will refresh the state accordingly.
         wwr_req('TRACK');
@@ -183,7 +169,7 @@ function init() {
         else
             wwr_req(`SET/TRACK/${sel_trk_idx}/SEL/0;SET/TRACK/${sel_trk_idx - 1}/SEL/1`);
 
-        // Since we are polling with frequence 1/1s, we can get inconsistent state
+        // Since we are polling with frequency 1/1s, we can get inconsistent state
         // if user clicks faster than that, hence the 'wwr_req('TRACK')' - it
         // will refresh the state accordingly.
         wwr_req('TRACK');
