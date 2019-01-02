@@ -10,14 +10,23 @@ const
     NEXT_TRK_CC = 91,
     MEDIA_EXPLR_CC = 87;
 
-var last_transport_state = -1, last_out_states = [-1, -1], last_time_str = "",
-    last_titles = [], last_flags = [], last_vols = [], last_pans = [],
-    last_metronome = false, last_track_cnt = 0,
+let
+    last_transport_state = -1,
+    last_out_states = [-1, -1],
+    last_time_str = "",
+    last_titles = [],
+    last_flags = [],
+    last_vols = [],
+    last_pans = [],
+    last_metronome = false,
+    last_track_cnt = 0,
     g_inspect_tridx = -1;
 
-var minvol = -100, maxvol = 24;
+let
+    minvol = -100,
+    maxvol = 24;
 
-let sel_trk_idx = 0;
+let sel_trk_idx = null;
 
 function setTextForObject(obj, text) { // thx cfillion
     if (obj.lastChild) obj.lastChild.nodeValue = text;
@@ -65,32 +74,6 @@ function wwr_onreply(results) {
                     }
                 }
                 break;
-            case "CMDSTATE":
-                if (tok[1] == 40364) {
-                    if ((tok[2] > 0) != last_metronome) {
-                        last_metronome = tok[2] > 0;
-                        if (g_inspect_tridx == 0)
-                            document.getElementById("trackinspect_clone").style.background = last_metronome ? "#8f8" : "#777";
-                    }
-                }
-                break;
-            case "SEND":
-                if (tok.length > 3) {
-                    var sendidx = parseInt(tok[2]);
-                    if (tok[1] == 0 && (sendidx == 0 || sendidx == 1)) {
-                        if ((tok[3] & 8) != last_out_states[sendidx]) {
-                            var host = document.getElementById("tracks").rows[0];
-                            if (host) host.cells[1 + sendidx].style.background = (last_out_states[sendidx] = (tok[3] & 8)) ? "#88f" : "#fff";
-                            if (g_inspect_tridx == 0) {
-                                if (sendidx == 0)
-                                    document.getElementById("trackinspect_arm").style.background = last_out_states[sendidx] ? "#88f" : "#fff";
-                                else
-                                    document.getElementById("trackinspect_mon").style.background = last_out_states[sendidx] ? "#88f" : "#fff";
-                            }
-                        }
-                    }
-                }
-                break;
             case "NTRACK":
                 if (tok.length > 1 && tok[1] >= 0) {
                     var host = document.getElementById("tracks");
@@ -103,125 +86,10 @@ function wwr_onreply(results) {
                 break;
             case "TRACK":
                 if (tok.length > 5) {
-                    var host = document.getElementById("tracks");
-                    var tidx = parseInt(tok[1]);
+                    const tidx = parseInt(tok[1]);
+
                     if (tok[3] & 2) {
                         sel_trk_idx = tidx;
-                    }
-                    if (host && tidx < 200) {
-                        var addtop = host.rows.length;
-                        while (addtop <= tidx) {
-                            var row = host.insertRow(addtop);
-                            last_titles[addtop] = null;
-                            last_flags[addtop] = null;
-                            last_vols[addtop] = null;
-                            last_pans[addtop] = null;
-
-                            var cell = row.insertCell(0);
-                            cell.className = "tracklbl";
-                            cell.onmousedown = inspect_track_handler(addtop);
-
-                            cell.appendChild(document.createElement('div'));
-                            var div = document.createElement('div');
-                            div.className = "trackinfo";
-                            cell.appendChild(div);
-
-                            cell = row.insertCell(1);
-                            cell.className = "trackbut";
-                            if (addtop > 0) {
-                                cell.innerHTML = "arm";
-                                cell.onmousedown = mouseDownEventHandler("SET/TRACK/" + addtop + "/RECARM/-1;TRACK/" + addtop);
-                            } else {
-                                cell.innerHTML = "main<br>out";
-                                cell.onmousedown = mouseDownEventHandler("SET/TRACK/0/SEND/0/MUTE/-1;GET/TRACK/0/SEND/0");
-                            }
-
-                            cell = row.insertCell(2);
-                            cell.className = "trackbut";
-                            if (addtop > 0) {
-                                cell.innerHTML = "mon";
-                                cell.onmousedown = mouseDownEventHandler("SET/TRACK/" + addtop + "/RECMON/-1;TRACK/" + addtop);
-                            } else {
-                                cell.innerHTML = "aux<br>out";
-                                cell.onmousedown = mouseDownEventHandler("SET/TRACK/0/SEND/1/MUTE/-1;GET/TRACK/0/SEND/1");
-                            }
-
-                            cell = row.insertCell(3);
-                            cell.className = "trackbut";
-                            cell.innerHTML = "mute";
-                            cell.onmousedown = mouseDownEventHandler("SET/TRACK/" + addtop + "/MUTE/-1;TRACK/" + addtop);
-
-                            addtop++;
-                        }
-
-                        host = host.rows[tidx];
-                        if (host) {
-                            if (tidx > 0) tok[2] = tidx + ". " + tok[2];
-                            if (tok[2] != last_titles[tidx]) {
-                                setTextForObject(host.cells[0].childNodes[0], last_titles[tidx] = tok[2]);
-                                if (g_inspect_tridx == tidx)
-                                    setTextForObject(document.getElementById("trackinspect_title"), tok[2]);
-                            }
-                            if (tok[4] != last_vols[tidx] || tok[5] != last_pans[tidx]) {
-                                last_vols[tidx] = tok[4];
-                                last_pans[tidx] = tok[5];
-
-                                if (g_inspect_tridx == tidx) {
-                                    var volf = document.getElementById("trackinspect_volf");
-                                    var volh = document.getElementById("trackinspect_volh");
-                                    setTextForObject(volh, mkvolstr(tok[4]));
-
-                                    var vol = parseFloat(tok[4]);
-                                    vol = vol < 0.0000001 ? -150 : Math.log(vol) * 8.68588963806;
-                                    if (vol < minvol) vol = minvol;
-                                    if (vol > maxvol) vol = maxvol;
-
-                                    var h = volf.offsetHeight - volh.offsetHeight;
-                                    if (h < 10) h = 10;
-                                    volh.style.top = Math.floor(volf.offsetTop + h * (maxvol - vol) / (maxvol - minvol)) + "px";
-                                }
-
-                                setTextForObject(host.cells[0].childNodes[1], mkvolstr(tok[4]) + " " + mkpanstr(tok[5]));
-                            }
-                            if (tok[3] != last_flags[tidx]) {
-                                last_flags[tidx] = tok[3];
-                                if (tidx > 0) {
-                                    host.cells[1].style.background = (tok[3] & 64) ? "#f88" : "#fff";
-                                    var c = host.cells[2];
-                                    switch (tok[3] & 384) {
-                                        case 128: c.innerHTML = "mon<BR>on"; c.style.background = "#8f8"; break;
-                                        case 256: c.innerHTML = "auto<BR>mon"; c.style.background = "#ff8"; break;
-                                        default: c.innerHTML = "mon<BR>off"; c.style.background = "#888"; break;
-                                    }
-                                }
-                                var c = host.cells[3];
-                                c.style.background = (tok[3] & 8) ? "#88f" : "#fff";
-                                c.innerHTML = (tok[3] & 8) ? "muted" : "mute";
-
-                                if (g_inspect_tridx == tidx) {
-                                    if (tidx > 0) {
-                                        c = document.getElementById("trackinspect_arm");
-                                        c.style.background = (tok[3] & 64) ? "#f88" : "#fff";
-
-                                        c = document.getElementById("trackinspect_mon");
-                                        switch (tok[3] & 384) {
-                                            case 128: c.innerHTML = "mon<BR>on"; c.style.background = "#8f8"; break;
-                                            case 256: c.innerHTML = "auto<BR>mon"; c.style.background = "#ff8"; break;
-                                            default: c.innerHTML = "mon<BR>off"; c.style.background = "#888"; break;
-                                        }
-                                    }
-
-                                    c = document.getElementById("trackinspect_mute");
-                                    c.style.background = (tok[3] & 8) ? "#88f" : "#fff";
-                                    c.innerHTML = (tok[3] & 8) ? "muted" : "mute";
-
-                                    c = document.getElementById("trackinspect_solo");
-                                    c.style.background = (tok[3] & 16) ? "#88f" : "#fff";
-                                    c.innerHTML = (tok[3] & 16) ? "soloed" : "solo";
-
-                                }
-                            }
-                        }
                     }
                 }
                 break;
@@ -360,6 +228,9 @@ function init() {
             case SEL_TRK_MUTE_CC:
                 wwr_req(`SET/TRACK/${sel_trk_idx}/MUTE/-1;TRACK/${sel_trk_idx}`);
                 break;
+            case SEL_TRK_SOLO_CC:
+                wwr_req(`SET/TRACK/${sel_trk_idx}/SOLO/-1;TRACK/${sel_trk_idx}`);
+                break;
             default:
                 break;
         }
@@ -369,29 +240,32 @@ function init() {
         wwr_req("SET/TRACK/" + trackIndex + "/VOL/" + (encoderValue / 127) * 4 ** (encoderValue / 127));
     }
 
-    function send_next_trk(trk_idx) {
-        if (trk_idx >= last_track_cnt - 1)
-            wwr_req(`SET/TRACK/${trk_idx}/SEL/0;SET/TRACK/1/SEL/1`);
-        wwr_req(`SET/TRACK/${trk_idx}/SEL/0;SET/TRACK/${++trk_idx}/SEL/1`);
+    function send_next_trk() {
+        if (sel_trk_idx == null)
+            wwr_req("SET/TRACK/1}/SEL/1");
+        if (sel_trk_idx >= last_track_cnt - 1)
+            wwr_req(`SET/TRACK/${sel_trk_idx}/SEL/0;SET/TRACK/1/SEL/1`);
+        else
+            wwr_req(`SET/TRACK/${sel_trk_idx}/SEL/0;SET/TRACK/${sel_trk_idx + 1}/SEL/1`);
 
-        // Since we are polling with frequence 1/1s, we can get state mismatch
+        // Since we are polling with frequence 1/1s, we can get inconsistent state
         // if user clicks faster than that, hence the "wwr_req('TRACK')" - it
         // will refresh the state accordingly.
         wwr_req('TRACK');
-
     }
 
-    function send_prev_trk(trk_idx) {
-        if (trk_idx <= 1) {
-            wwr_req(`SET/TRACK/${trk_idx}/SEL/0;SET/TRACK/${last_track_cnt - 1}/SEL/1`);
-        }
-        wwr_req(`SET/TRACK/${trk_idx}/SEL/0;SET/TRACK/${--trk_idx}/SEL/1`);
+    function send_prev_trk() {
+        if (sel_trk_idx == null)
+            wwr_req("SET/TRACK/1}/SEL/1");
+        if (sel_trk_idx <= 1)
+            wwr_req(`SET/TRACK/${sel_trk_idx}/SEL/0;SET/TRACK/${last_track_cnt - 1}/SEL/1`);
+        else
+            wwr_req(`SET/TRACK/${sel_trk_idx}/SEL/0;SET/TRACK/${sel_trk_idx - 1}/SEL/1`);
 
-        // Since we are polling with frequence 1/1s, we can get state mismatch
+        // Since we are polling with frequence 1/1s, we can get inconsistent state
         // if user clicks faster than that, hence the "wwr_req('TRACK')" - it
         // will refresh the state accordingly.
         wwr_req('TRACK');
-
     }
 
     document.getElementById("trackinspect_clone").onmousedown = function (e) {
