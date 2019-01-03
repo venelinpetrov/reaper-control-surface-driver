@@ -5,7 +5,7 @@
 1. In REAPER navigate to `Options->Preferences->Control/OSC/web`
 2. Click `Add`
 3. Choose `Web browser interface`
-4. Click `User pages...`
+4. Click `User pages...` (or `Built-in pages`, doesn't matter)
 5. A window will popup. Clone the repo or download a zip and extract it there
 6. Choose the driver from the list that says `Default interfaces`
 7. Copy-paste the Access URL in a browser
@@ -30,6 +30,8 @@ In principle, the app intersepts incomming MIDI messages, interprets them based 
 HTTP requests, where the URL contains the command(s). REAPER can respond and return messages to the app too. This is useful if you want
 to implement a feedback (e.g. you have some buttons that you want to lid and keep in sync with the DAW).
 
+**Note:** Just to make it clear, you don't actually need internet access to use this driver, it's a localhost app.
+
 MIDI CC Layout
 
 ![image](https://user-images.githubusercontent.com/3126733/50611921-de817500-0ee0-11e9-8916-f65bf7f9c52a.png)
@@ -51,8 +53,8 @@ If you use [Visual Studio Code](https://code.visualstudio.com/) and Chrome you c
 ### Pros
 
 1. Portable. It's just html and javascript, so it runs on every machine that has browser
-2. Support two-way communication between REAPER and the Controller. Useful for feedback scenarios
-2. Easy to debug. It's a web app and you can actually debug it in real time in contrast to EEL and Lua solutions
+2. Supports two-way communication between REAPER and the Controller. Useful for feedback scenarios and keeping in sync with the DAW
+2. Debuggable. It's a web app and you can actually debug it in contrast to EEL and Lua solutions
 3. No prerequisites. You don't need to install anything on your machine (no extensions, plugins, third-party software etc.)
 
 ### Cons
@@ -61,7 +63,7 @@ If you use [Visual Studio Code](https://code.visualstudio.com/) and Chrome you c
 step process. One - paste the driver. Two - run web app in browser
 
 2. Since this is a web app you have no way to guarantee that it runs or it doesn't run multiple times in multiple tabs/browsers.
-This can bring confusion if you are not careful
+This can bring confusion if you are not careful.
 
 Overall the benefits are greater than the drawbacks, but this is the further we can get until REAPER team doesn't invent something else.
 
