@@ -26,11 +26,11 @@ Internally REAPER runs a web server that listens for HTTP requests from a web ap
 runs a GUI app and controls REAPER in realtime. He also receives feedback from the DAW like time, metronome, track mute/solo/arm/pan/vol params etc.
 I thought that I can exploit this by only removing the GUI and reading the incoming MIDI messages. And it worked.
 
-In principle, the app intersepts incomming MIDI messages, interprets them based on some logic and send commands to REAPER in form of
+In principle, the app intercepts incomming MIDI messages, interprets them based on some logic and send commands to REAPER in form of
 HTTP requests, where the URL contains the command(s). REAPER can respond and return messages to the app too. This is useful if you want
-to implement a feedback (e.g. you have some buttons that you want to lid and keep in sync with the DAW).
+to implement a feedback (e.g. you have some buttons that you want to light up and keep in sync with the DAW).
 
-**Note:** Just to make it clear, you don't actually need internet access to use this driver, it's a localhost app.
+**Note:** Just to make it clear, you don't actually need internet access to use this driver, it's an app on localhost.
 
 MIDI CC Layout
 

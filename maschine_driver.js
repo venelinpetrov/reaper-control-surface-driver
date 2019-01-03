@@ -82,7 +82,7 @@ wwr_req_recur('NTRACK;TRACK;', 1000);
 // This function is implemented in main.js
 wwr_start();
 
-// This function is called by main.js
+// This function is called by maschine_driver.html
 function init() {
     //Request midi accsess
     navigator.requestMIDIAccess().then(function (midi_access) {
