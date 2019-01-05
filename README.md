@@ -67,6 +67,35 @@ This can bring confusion if you are not careful.
 
 Overall the benefits are greater than the drawbacks, but this is the further we can get until REAPER team doesn't invent something else.
 
+## Start the driver from REAPER
+
+To make things more convenient you can create a custom action that starts the web app on `http://localhost:8080` with a click of a button.
+
+1. Go to `Actions` menu and click `Show action list...`
+2. Click `New...` ReaScript action
+3. A window will popup
+4. Create a file (e.g. `run_midi_driver.lua`) and paste the following code
+
+```lua
+-- Change the port if you need
+url = "http://localhost:8080"
+
+function open_url(url)
+  local OS = reaper.GetOS()
+  if OS == "OSX32" or OS == "OSX64" then
+    os.execute('open "" "' .. url .. '"')
+  else
+    os.execute('start "" "' .. url .. '"')
+  end
+end
+
+open_url(url)
+```
+
+5. Now you can add a custom button in your toolbar that will execute the script
+
+![image](https://user-images.githubusercontent.com/3126733/50728047-d3228980-112c-11e9-86ea-e1ec2bdfa75a.png)
+
 ## Contribute
 
 Please open an issue if you like to discuss something or create a PR. You are very welcome to do so.
