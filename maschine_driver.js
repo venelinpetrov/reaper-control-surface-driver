@@ -111,7 +111,13 @@ function init() {
 
         switch (event.data[1]) {
             case PLAY_CC:
-                wwr_req(1007);
+                // The play button is a toggle button, so when it is
+                // in active state pause the mix, otherwise play it
+                if (last_transport_state & 1 > 0) {
+                    wwr_req(1008); // 1008 is pause, 1016 is stop if you prefer
+                } else {
+                    wwr_req(1007);
+                }
                 break;
             case VOL_1_CC:
                 send_trk_vol(1, val);
