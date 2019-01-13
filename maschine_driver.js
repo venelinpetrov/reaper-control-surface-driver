@@ -11,6 +11,12 @@
 const
     VOL_1_CC = 14,
     VOL_2_CC = 15,
+    VOL_3_CC = 16,
+    VOL_4_CC = 17,
+    VOL_5_CC = 18,
+    VOL_6_CC = 19,
+    VOL_7_CC = 20,
+    VOL_8_CC = 21,
     PLAY_CC = 108,
     REC_CC = 109,
     SEL_TRK_SOLO_CC = 118,
@@ -124,6 +130,24 @@ function init() {
                 break;
             case VOL_2_CC:
                 send_trk_vol(2, val);
+                break;
+            case VOL_3_CC:
+                send_trk_vol(3, val);
+                break;
+            case VOL_4_CC:
+                send_trk_vol(4, val);
+                break;
+            case VOL_5_CC:
+                send_trk_vol(5, val);
+                break;
+            case VOL_6_CC:
+                send_trk_vol(6, val);
+                break;
+            case VOL_7_CC:
+                send_trk_vol(7, val);
+                break;
+            case VOL_8_CC:
+                send_trk_vol(8, val);
                 break;
             case PREV_TRK_CC:
                 send_prev_trk(sel_trk_idx);
