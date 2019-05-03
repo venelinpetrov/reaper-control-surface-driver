@@ -101,6 +101,14 @@ open_url(url)
 
 ![image](https://user-images.githubusercontent.com/3126733/50728047-d3228980-112c-11e9-86ea-e1ec2bdfa75a.png)
 
+
+## Automatically start the driver whenever REAPER starts
+
+REAPER allows you to run scripts on startup. This is done by creating a new file in (Windows) `%appdata%\reaper\Scripts` called `__startup.lua`. Then paste the script from above in this file and you are good to go.
+
+**NOTE 1:** Closing REAPER doesn't close the browser tabs that this script opens  
+**NOTE 2:** It's best practice to actually create a separate file for the script and then import (require) it from `__startup.lua`. This makes things cleaner if you have more startup scripts
+
 ## Contribute
 
 Please open an issue if you like to discuss something or create a PR. You are very welcome to do so.
