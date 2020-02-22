@@ -29,7 +29,7 @@ let
     last_transport_state = -1,
     sel_trk_idx = null
     last_track_cnt = 0;
-    trk_changed = false;
+    prev_trk_idx = -1;
 
 let
     outputs = null,
@@ -60,10 +60,11 @@ function wwr_onreply(results) {
                         const tidx = parseInt(tok[1]);
                         if (tok[3] & 2) {
                             sel_trk_idx = tidx;
-                            if (trk_changed) {
+                            if (prev_trk_idx != sel_trk_idx) {
                                 outputs_by_name['Maschine Mikro MK2 Out'].send([176, 118, (tok[3] & 16) > 0 ? 127 : 0]);
                                 outputs_by_name['Maschine Mikro MK2 Out'].send([176, 119, (tok[3] & 8) > 0 ? 127 : 0]);
-                                trk_changed = false;
+                                prev_trk_idx = tidx;
+                                console.log('idx:', tidx)
                             }
                         }
                     }
@@ -81,7 +82,6 @@ function on_transport_state_changed() {
     if (outputs_by_name['Maschine Mikro MK2 Out']) {
         outputs_by_name['Maschine Mikro MK2 Out'].send([176, PLAY_CC, (last_transport_state & 1) > 0 ? 127 : 0]);
         outputs_by_name['Maschine Mikro MK2 Out'].send([176, REC_CC, (last_transport_state & 4) > 0 ? 127 : 0]);
-        //tok[3] & 8
     }
 }
 
@@ -89,7 +89,7 @@ function on_transport_state_changed() {
 wwr_req_recur('TRANSPORT', 10);
 
 // Number of tracks and track information updates on every 1000ms
-wwr_req_recur('NTRACK;TRACK;', 1000);
+wwr_req_recur('NTRACK;TRACK;', 100);
 
 // This function is implemented in main.js
 wwr_start();
@@ -162,17 +162,11 @@ function init() {
                 send_trk_vol(8, val);
                 break;
             case PREV_TRK_CC:
-                trk_changed=true;
                 wwr_req(40286);
-                // Send TRACK request so to receive status immediately and update.
-                // This is required, because polling interval can cause the state to go out of sync
                 wwr_req('TRACK');
                 break;
             case NEXT_TRK_CC:
-                trk_changed = true;
                 wwr_req(40285);
-                // Send TRACK request so to receive status immediately and update.
-                // This is required, because polling interval can cause the state to go out of sync
                 wwr_req('TRACK');
                 break;
             case MEDIA_EXPLR_CC:
