@@ -29,6 +29,7 @@ let
     last_transport_state = -1,
     sel_trk_idx = null
     last_track_cnt = 0;
+    trk_changed = false;
 
 let
     outputs = null,
@@ -57,9 +58,13 @@ function wwr_onreply(results) {
                 case 'TRACK':
                     if (tok.length > 5) {
                         const tidx = parseInt(tok[1]);
-
                         if (tok[3] & 2) {
                             sel_trk_idx = tidx;
+                            if (trk_changed) {
+                                outputs_by_name['Maschine Mikro MK2 Out'].send([176, 118, (tok[3] & 16) > 0 ? 127 : 0]);
+                                outputs_by_name['Maschine Mikro MK2 Out'].send([176, 119, (tok[3] & 8) > 0 ? 127 : 0]);
+                                trk_changed = false;
+                            }
                         }
                     }
                     break;
@@ -76,6 +81,7 @@ function on_transport_state_changed() {
     if (outputs_by_name['Maschine Mikro MK2 Out']) {
         outputs_by_name['Maschine Mikro MK2 Out'].send([176, PLAY_CC, (last_transport_state & 1) > 0 ? 127 : 0]);
         outputs_by_name['Maschine Mikro MK2 Out'].send([176, REC_CC, (last_transport_state & 4) > 0 ? 127 : 0]);
+        //tok[3] & 8
     }
 }
 
@@ -112,10 +118,16 @@ function init() {
 
     // Respond to MIDI messages
     function on_midi_msg(event) {
+        const cc = event.data[1];
         const val = event.data[2];
+
         console.log(event.data);
 
-        switch (event.data[1]) {
+        switch (cc) {
+            case 115:
+                // The Command ID of a custom action that toggles the FX rack
+                wwr_req('_dabc7267fcf7854e80a59865f2e6c261');
+                break;
             case PLAY_CC:
                 // The play button is a toggle button, so when it is
                 // in active state pause the mix, otherwise play it
@@ -150,10 +162,18 @@ function init() {
                 send_trk_vol(8, val);
                 break;
             case PREV_TRK_CC:
-                send_prev_trk(sel_trk_idx);
+                trk_changed=true;
+                wwr_req(40286);
+                // Send TRACK request so to receive status immediately and update.
+                // This is required, because polling interval can cause the state to go out of sync
+                wwr_req('TRACK');
                 break;
             case NEXT_TRK_CC:
-                send_next_trk(sel_trk_idx);
+                trk_changed = true;
+                wwr_req(40285);
+                // Send TRACK request so to receive status immediately and update.
+                // This is required, because polling interval can cause the state to go out of sync
+                wwr_req('TRACK');
                 break;
             case MEDIA_EXPLR_CC:
                 wwr_req(50124);
@@ -174,34 +194,5 @@ function init() {
         // Read 'main.js' for more information. The formula is also dealing with the fact that
         // There are more numbers from -inf to 0 than from 0 to +12. It makes the encoder less jumpy.
         wwr_req(`SET/TRACK/${trackIndex}/VOL/${(encoderValue / 127) * 4 ** (encoderValue / 127)}`);
-    }
-
-    // The functions below implement cycle selection of tracks
-    function send_next_trk() {
-        if (sel_trk_idx == null)
-            wwr_req('SET/TRACK/1}/SEL/1');
-        if (sel_trk_idx >= last_track_cnt - 1)
-            wwr_req(`SET/TRACK/${sel_trk_idx}/SEL/0;SET/TRACK/1/SEL/1`);
-        else
-            wwr_req(`SET/TRACK/${sel_trk_idx}/SEL/0;SET/TRACK/${sel_trk_idx + 1}/SEL/1`);
-
-        // Since we are polling with frequency 1/1s, we can get inconsistent state
-        // if user clicks faster than that, hence the 'wwr_req('TRACK')' - it
-        // will refresh the state accordingly.
-        wwr_req('TRACK');
-    }
-
-    function send_prev_trk() {
-        if (sel_trk_idx == null)
-            wwr_req('SET/TRACK/1}/SEL/1');
-        if (sel_trk_idx <= 1)
-            wwr_req(`SET/TRACK/${sel_trk_idx}/SEL/0;SET/TRACK/${last_track_cnt - 1}/SEL/1`);
-        else
-            wwr_req(`SET/TRACK/${sel_trk_idx}/SEL/0;SET/TRACK/${sel_trk_idx - 1}/SEL/1`);
-
-        // Since we are polling with frequency 1/1s, we can get inconsistent state
-        // if user clicks faster than that, hence the 'wwr_req('TRACK')' - it
-        // will refresh the state accordingly.
-        wwr_req('TRACK');
     }
 }
